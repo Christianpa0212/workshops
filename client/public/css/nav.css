@@ -1,0 +1,15 @@
+#logoNav {
+  height: 100px;       
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  #logoNav {
+    height: 60px;      
+  }
+}
+
+#iconoHamburguesa {
+filter: brightness(0) saturate(100%) invert(80%) sepia(100%) saturate(700%) hue-rotate(350deg) brightness(115%) contrast(105%);
+}
