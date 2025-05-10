@@ -1,4 +1,3 @@
-// controllers/periodoAdminController.js
 const db = require('../../../config/db/db');
 
 // Renderiza la vista principal con HBS
