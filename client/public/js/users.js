@@ -228,7 +228,7 @@ btnAdd.addEventListener("click", () => {
       });
 
       document.getElementById("modalUserLabel").textContent =
-        modoLectura ? "Ver Usuario" : "Editar Usuario";
+        modoLectura ? "View User" : "Edit User";
       document.getElementById("btnGuardarCambios").style.display =
         modoLectura ? "none" : "inline-block";
 
@@ -239,8 +239,8 @@ btnAdd.addEventListener("click", () => {
   });
 
    // ============================
-  // SUBMIT: Modal Editar Talleristas y Profesores
-  // Envía el formulario al backend vía PUT para actualizar datos
+  // SUBMIT: Modal Editar
+  // 
   // ============================
   document.getElementById("formUser").addEventListener("submit", async (e) => {
     e.preventDefault();

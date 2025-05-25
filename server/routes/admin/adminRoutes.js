@@ -6,6 +6,7 @@ const homeAdminController = require('../../controllers/admin/adminViewsControlle
 // ======= Subrutas administrativas =======
 const userRoutes = require('./user/userAdminRoutes');       // Alumnos, talleristas y profesores');
 const workshopRoutes = require('./workshop/workshopRoutes');
+const periodRoutes = require('./period/periodAdminRoutes');
 
 // ======= Vista principal del administrador =======
 router.get('/', homeAdminController.mostrarHomeAdmin);
