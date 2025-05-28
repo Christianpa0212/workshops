@@ -20,4 +20,8 @@ router.post('/api/cancelar/:idinscripcion', workshopsController.cancelarInscripc
 //Verifica inscripcion
 router.get('/api/estado-inscripcion/:idtaller', workshopsController.verificarInscripcion);
 
+// API: Obtener una inscripción por ID
+router.get('/api/inscripcion/:id', workshopsController.getInscripcionById);
+
+
 module.exports = router;

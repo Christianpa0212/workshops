@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     calendarContainer.style.display = "block";
 
     if (!calendar) {
-      console.log("Instanciando calendario...");
       calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: 'dayGridMonth',
         locale: 'en',
@@ -77,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
               btnGuardar.className = "btn btn-dark";
               btnGuardar.onclick = async () => {
                 const idtaller = document.getElementById("idtaller").value;
-
                 if (!idtaller || isNaN(idtaller)) {
                   alert("Error: ID del taller inválido.");
                   return;
@@ -94,8 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
                   return;
                 }
 
-                const result = await insRes.json();
-                alert("Inscripción exitosa");
                 calendar.refetchEvents();
                 cargarInscripciones();
                 modalTaller.hide();
@@ -118,7 +114,31 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===============================
-  // Cargar inscripciones a tabla
+  // Formato de fecha y hora
+  // ===============================
+  function formatearFecha(fecha) {
+  const d = new Date(fecha);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const anio = d.getFullYear();
+  return `${dia}/${mes}/${anio}`;
+}
+
+
+  function formatearHora(horaStr) {
+  // Si ya viene como string "22:20:00"
+  if (typeof horaStr === 'string' && horaStr.includes(':')) {
+    const [hh, mm] = horaStr.split(":");
+    return `${hh}:${mm}`;
+  }
+  // Si es Date
+  const d = new Date(horaStr);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+
+  // ===============================
+  // Cargar inscripciones a la tabla
   // ===============================
   async function cargarInscripciones() {
     try {
@@ -128,8 +148,15 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.innerHTML = inscripciones.map(i => `
         <tr>
           <td>${i.nombre}</td>
-          <td><span class="badge ${i.estatus === 'inscrito' ? 'bg-success' : 'bg-secondary'}">${i.estatus}</span></td>
-          <td>${i.fecha} ${i.hora}</td>
+          <td>
+            <span class="badge ${
+              i.estatus === 'asistió' ? 'bg-success' :
+              i.estatus === 'no asistió' ? 'bg-danger' :
+              i.estatus === 'cancelado' ? 'bg-secondary' :
+              'bg-warning'
+            }">${i.estatus}</span>
+          </td>
+          <td>${formatearFecha(i.fecha)} ${formatearHora(i.hora)}</td>
           <td><span class="badge ${i.estado_taller === 'active' ? 'bg-info' : 'bg-warning'}">${i.estado_taller}</span></td>
           <td class="text-center">
             <button class="btn btn-outline-secondary btn-sm me-1" data-action="view" data-id="${i.idinscripcion}"><i class="bi bi-eye-fill"></i></button>
@@ -143,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===============================
-  // Ver detalles o cancelar desde la tabla
+  // Ver detalle o cancelar
   // ===============================
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
@@ -152,19 +179,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
-    if (action === "view") {
-      const res = await fetch("/alumno/talleres/api/inscripciones", { credentials: 'include' });
-      const data = await res.json();
-      const inscripcion = data.find(i => i.idinscripcion == id);
+   if (action === "view") {
+  const res = await fetch(`/alumno/talleres/api/inscripcion/${id}`, { credentials: 'include' });
+  const inscripcion = await res.json();
 
-      document.getElementById("detalleNombre").textContent = inscripcion.nombre;
-      document.getElementById("detalleDescripcion").textContent = inscripcion.descripcion;
-      document.getElementById("detalleFechaHora").textContent = `${inscripcion.fecha} ${inscripcion.hora}`;
-      document.getElementById("detalleTallerista").textContent = inscripcion.tallerista;
-      document.getElementById("detalleEstatus").textContent = inscripcion.estatus;
+  document.getElementById("nombre").value = inscripcion.nombre;
+  document.getElementById("descripcion").value = inscripcion.descripcion;
+  document.getElementById("fecha").value = inscripcion.fecha;
+  document.getElementById("hora").value = inscripcion.hora;
+  document.getElementById("tallerista").value = inscripcion.tallerista;
+  document.getElementById("idtaller").value = inscripcion.idtaller;
 
-      modalTaller.show();
-    }
+  modalTaller.show();
+}
+
 
     if (action === "cancel") {
       cancelTargetId = id;
@@ -173,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===============================
-  // Confirmación de cancelación
+  // Confirmar cancelación
   // ===============================
   btnConfirmDelete.addEventListener("click", async () => {
     const res = await fetch(`/alumno/talleres/api/cancelar/${cancelTargetId}`, {

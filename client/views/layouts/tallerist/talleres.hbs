@@ -165,10 +165,10 @@
               <tr>
                 <th>Full Name</th>
                 <th>English Level</th>
+                <th class="text-center d-none" id="colAsistencia">Attendance</th>
               </tr>
             </thead>
             <tbody id="tbodyAlumnosInscritos">
-              <!-- Filled dynamically from JS -->
             </tbody>
           </table>
         </div>
@@ -176,10 +176,14 @@
 
       <div class="modal-footer bg-secondary-subtle">
         <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success d-none" id="btnConfirmarAsistencia">
+          <i class="bi bi-check-circle-fill me-2"></i> Confirm Attendance
+        </button>
       </div>
     </div>
   </div>
 </div>
+
 
   <!-- ======= Modal: Confirmar cancelación ======= -->
   <div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">

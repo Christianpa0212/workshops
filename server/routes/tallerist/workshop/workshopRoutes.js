@@ -18,7 +18,7 @@ router.post('/api/cancelar/:idtaller', workshopsController.cancelarTaller);
 router.get('/api/inscritos/:idtaller', workshopsController.getInscritosTaller);
 
 // API: Marcar asistencias
-router.post('/api/asistencias', workshopsController.marcarAsistencias);
+router.post('/api/asistencia', workshopsController.marcarAsistencias);
 
 // editar taller
 router.put('/api/:idtaller', workshopsController.editarTaller);
