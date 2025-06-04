@@ -1,0 +1,78 @@
+<footer style="background-color: #0a263d; color: white; padding: 20px 10px; text-align: center;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    
+    <!-- Logo -->
+    <img src="/img/logoUni.png" alt="Logo Universidad" style="width: 60px; margin-bottom: 10px;" />
+
+    <h4 style="margin-bottom: 10px;">What did you think of our platform?</h4>
+
+    <!-- Formulario de estrellas -->
+    <form id="feedbackForm" style="display: flex; flex-direction: column; align-items: center;">
+      <div id="starRating" style="margin-bottom: 10px;">
+        <span class="star" data-value="1" style="font-size: 24px; cursor: pointer; color: #ccc;">&#9733;</span>
+        <span class="star" data-value="2" style="font-size: 24px; cursor: pointer; color: #ccc;">&#9733;</span>
+        <span class="star" data-value="3" style="font-size: 24px; cursor: pointer; color: #ccc;">&#9733;</span>
+        <span class="star" data-value="4" style="font-size: 24px; cursor: pointer; color: #ccc;">&#9733;</span>
+        <span class="star" data-value="5" style="font-size: 24px; cursor: pointer; color: #ccc;">&#9733;</span>
+      </div>
+
+      <input type="hidden" name="estrellas" id="ratingValue" value="0">
+
+      <button type="submit" style="margin-top: 8px; padding: 6px 12px; background-color: white; color: #0a263d; border: none; border-radius: 4px; cursor: pointer;">
+        Send
+      </button>
+    </form>
+
+    <!-- Enlace a formulario -->
+    <p style="margin-top: 15px; font-size: 14px;">
+      Would you like to tell us more about your experience?
+      <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=cZgrEyXgrU6jTXvV56ODtPm-Txzx7OdElFiosR7jqKdUQ0xFM1hCNUJMS0xBMFA1SFI4UDMwNEVYNS4u" target="_blank" style="color: #ffcc00; text-decoration: underline;">
+       Click here to leave your feedback!
+      </a>
+    </p>
+  </div>
+</footer>
+
+<!-- Scrip de funcionamiento -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('ratingValue');
+    const form = document.getElementById('feedbackForm');
+
+    if (!stars.length || !form) return; // Protege si el footer no está presente
+
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const value = parseInt(star.dataset.value);
+        ratingValue.value = value;
+
+        stars.forEach((s, index) => {
+          s.style.color = (index < value) ? 'gold' : '#ccc';
+        });
+      });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      fetch('/guardar-valoracion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ estrellas: ratingValue.value })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.mensaje);
+        form.reset();
+        stars.forEach(s => s.style.color = '#ccc');
+      })
+      .catch(error => {
+        console.error(error);
+        alert('Error al guardar tu calificación.');
+      });
+    });
+  });
+</script>
