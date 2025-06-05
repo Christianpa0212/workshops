@@ -188,7 +188,8 @@ btnCalendar.addEventListener("click", () => {
     if (!btnGuardar.offsetParent) return;
 
     const payload = Object.fromEntries(new FormData(form).entries());
-    const url = editandoId ? `/admin/talleres/api/${form.idtaller.value}` : "/admin/talleres/api";
+    //const url = editandoId ? `/admin/talleres/api/${form.idtaller.value}` : "/admin/talleres/api";
+    const url = editandoId ? `/admin/talleres/api/${form.idtaller.value}` : "/admin/talleres/api/crear";
     const method = editandoId ? "PUT" : "POST";
 
     const res = await fetch(url, {
