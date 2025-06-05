@@ -268,13 +268,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btnGuardar.offsetParent) return;
 
     const payload = {
-      nombre: form.nombre.value,
-      descripcion: form.descripcion.value,
-      fecha: form.fecha.value,
-      hora: form.hora.value,
-      cupo_maximo: form.cupo_maximo.value,
-      idperiodo: form.idperiodo.value
-    };
+      
+    nombre: form.nombre.value,
+    descripcion: form.descripcion.value,
+    fecha: form.fecha.value,
+    hora: form.hora.value,
+    cupo_maximo: form.cupo_maximo.value,
+    idperiodo: parseInt(form.idperiodo.value) || null 
+};
+
+  
 
     if (editandoId) payload.idtaller = form.idtaller.value;
 

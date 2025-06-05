@@ -641,3 +641,37 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+------------------------------------------------------------------------------------------------------------
+/*Procedimiento para crear talleres */
+DELIMITER //
+
+CREATE PROCEDURE sp_crear_taller_tallerista (
+  IN p_nombre VARCHAR(100),
+  IN p_descripcion TEXT,
+  IN p_fecha DATE,
+  IN p_hora TIME,
+  IN p_cupo_maximo INT,
+  IN p_idtallerista INT,
+  IN p_idperiodo INT
+)
+BEGIN
+  INSERT INTO talleres (
+    nombre,
+    descripcion,
+    fecha,
+    hora,
+    cupo_maximo,
+    idtallerista,
+    idperiodo
+  ) VALUES (
+    p_nombre,
+    p_descripcion,
+    p_fecha,
+    p_hora,
+    p_cupo_maximo,
+    p_idtallerista,
+    p_idperiodo
+  );
+END //
+
+DELIMITER ;

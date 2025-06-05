@@ -1,17 +1,37 @@
 const db = require('../../../config/db/db');
 
 // Renderizar vista de talleres del tallerista
-exports.renderWorkshopsView = async (req, res) => {
+/*exports.renderWorkshopsView = async (req, res) => {
   res.render('layouts/tallerist/talleres'); // Ajusta si tu ruta cambia
+};*/
+
+// Renderizar vista de talleres del tallerista
+exports.renderWorkshopsView = async (req, res) => {
+  try {
+    const [periodoActivo] = await db.query('SELECT * FROM view_periodo_activo');
+    res.render('layouts/tallerist/talleres', {
+      periodoActivo: periodoActivo[0] || null
+    });
+  } catch (error) {
+    console.error('❌ Error al cargar periodo activo:', error);
+    res.status(500).send('Error al cargar la vista de talleres');
+  }
 };
+
 
 // Crear taller
 exports.crearTaller = async (req, res) => {
   const idtallerista = req.session.user.id; 
-  const { nombre, descripcion, fecha, hora, cupo_maximo } = req.body;
+  /*const { nombre, descripcion, fecha, hora, cupo_maximo } = req.body;
   await db.query('CALL sp_crear_taller_tallerista(?, ?, ?, ?, ?, ?)', [
     nombre, descripcion, fecha, hora, cupo_maximo, idtallerista
-  ]);
+  ]);*/
+  //
+  const { nombre, descripcion, fecha, hora, cupo_maximo, idperiodo } = req.body;
+await db.query('CALL sp_crear_taller_tallerista(?, ?, ?, ?, ?, ?, ?)', [
+  nombre, descripcion, fecha, hora, cupo_maximo, idtallerista, idperiodo
+]);
+
   res.status(201).json({ message: 'Taller creado correctamente' });
 };
 
