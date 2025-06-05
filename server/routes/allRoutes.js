@@ -22,4 +22,28 @@ router.use('/tallerista', isTallerist, talleristRoutes);
 router.use('/', generalRoutes);
 router.use('/', authRoutes);
 
+// ======= Ruta para retroalimentación 5 estrellas ======
+const fs = require('fs');
+const path = require('path');
+
+router.post('/guardar-valoracion', (req, res) => {
+  const { estrellas } = req.body;
+
+  if (!estrellas || estrellas < 1 || estrellas > 5) {
+    return res.status(400).json({ mensaje: 'Valor inválido' });
+  }
+
+  const rutaArchivo = path.join(__dirname, '../data/valoraciones.txt');
+  const fecha = new Date().toLocaleString('es-MX');
+  const entrada = `[${fecha}] Calificación: ${estrellas} estrellas\n`;
+
+  fs.appendFile(rutaArchivo, entrada, err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ mensaje: 'Error al guardar la calificación' });
+    }
+    res.status(200).json({ mensaje: '¡Gracias por tu calificación!' });
+  });
+});
+
 module.exports = router;
