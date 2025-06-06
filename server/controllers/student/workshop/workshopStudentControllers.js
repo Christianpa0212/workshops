@@ -186,3 +186,90 @@ exports.getInscripcionById = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener inscripción' });
   }
 };
+
+
+
+// funcionalidad para reportes
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
+
+
+exports.generarReporteAlumno = async (req, res) => {
+  // Verificación de sesión y correo
+  if (!req.session.user || !req.session.user.email) {
+    return res.status(400).send('Sesión no válida o sin correo');
+  }
+
+  const idalumno = req.session.user.id;
+  const email = req.session.user.email;
+
+  try {
+    const [talleres] = await db.query(
+      'SELECT nombre_taller AS nombre, fecha, hora FROM view_inscripciones_alumno WHERE idalumno = ?',
+      [idalumno]
+    );
+
+    const tempDir = path.join(__dirname, '../../../../client/public/temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true }); // permite crear carpetas anidadas
+    }
+
+    const filePath = path.join(tempDir, `reporte_alumno_${idalumno}.pdf`);
+    const doc = new PDFDocument();
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Logo
+    doc.image(path.join(__dirname, '../../../../client/public/img/logo.png'), 50, 30, { width: 80 });
+
+    doc.fontSize(20).text('Reporte de Talleres Asistidos', 150, 30);
+    doc.moveDown(2);
+
+    if (talleres.length === 0) {
+      doc.image(path.join(__dirname, '../../../../client/public/img/vacio.png'), { width: 150 });
+      doc.fontSize(16).text('No asististe a ningún taller.', { align: 'center' });
+    } else {
+      talleres.forEach((t, i) => {
+        doc.fontSize(12).text(`${i + 1}. ${t.nombre} - ${t.fecha} - ${t.hora}`);
+      });
+    }
+
+    doc.end();
+
+    stream.on('finish', async () => {
+      try {
+        // Enviar por correo
+        await sgMail.send({
+          to: email,
+          from: process.env.CORREO_ADMIN, 
+
+          subject: 'Reporte de Talleres Asistidos',
+          text: 'Aquí está tu reporte de talleres en PDF.',
+          attachments: [{
+            content: fs.readFileSync(filePath).toString("base64"),
+            filename: "reporte_talleres.pdf",
+            type: "application/pdf",
+            disposition: "attachment"
+          }]
+        });
+
+        // Descargar archivo PDF
+        res.download(filePath, err => {
+          if (!err) {
+            // Opcional: eliminar archivo después de enviarlo y descargarlo
+            fs.unlinkSync(filePath);
+          }
+        });
+
+      } catch (correoError) {
+        console.error("❌ Error al enviar correo:", correoError);
+        res.status(500).send("Error al enviar el reporte por correo.");
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error al generar PDF:', error);
+    res.status(500).send('Error al generar el reporte');
+  }
+};

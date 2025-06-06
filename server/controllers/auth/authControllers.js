@@ -72,10 +72,12 @@ exports.loginUsuario = async (req, res) => {
   if (!match) return res.redirect('/login');
 
   req.session.user = {
-    id: user.iduser,
-    rol: user.rol,
-    nombre: user.nombre
-  };
+  id: user.iduser,
+  email: user.email,       //
+  rol: user.rol,
+  nombre: user.nombre
+};
+
 
   switch (user.rol) {
     case 'admin': return res.redirect('/admin');

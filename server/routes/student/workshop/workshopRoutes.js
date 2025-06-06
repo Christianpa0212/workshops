@@ -23,5 +23,9 @@ router.get('/api/estado-inscripcion/:idtaller', workshopsController.verificarIns
 // API: Obtener una inscripción por ID
 router.get('/api/inscripcion/:id', workshopsController.getInscripcionById);
 
+// generar reportes
+const workshopStudentControllers = require('../../../controllers/student/workshop/workshopStudentControllers');
+
+router.get('/generar-reporte', workshopStudentControllers.generarReporteAlumno);
 
 module.exports = router;
