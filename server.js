@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./cronjobs');
 const express = require('express');
 const session = require('express-session');
 const morgan = require('morgan');

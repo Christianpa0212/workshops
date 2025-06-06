@@ -56,7 +56,19 @@ exports.changeEstadoTaller = async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
 
-  await db.query('CALL sp_cambiar_estado_taller(?, ?)', [id, estado]);
+  try {
+    // 1. Cambiar el estado del taller (usando tu procedimiento almacenado)
+    await db.query('CALL sp_cambiar_estado_taller(?, ?)', [id, estado]);
 
-  res.json({ message: `Taller marcado como ${estado}` });
+    // 2. Si el estado nuevo es 'cancelado', enviar notificación por correo
+    if (estado === 'cancelado') {
+      const notificarCancelacionTaller = require('../utils/notificarCancelacion');
+      await notificarCancelacionTaller(id); // ID del taller
+    }
+
+    res.json({ message: `Taller marcado como ${estado}` });
+  } catch (error) {
+    console.error("❌ Error al cambiar estado del taller:", error);
+    res.status(500).json({ error: 'No se pudo cambiar el estado del taller' });
+  }
 };

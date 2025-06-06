@@ -86,12 +86,14 @@ document.addEventListener("DOMContentLoaded", () => {
                   credentials: 'include'
                 });
 
+                const data = await insRes.json();
+
                 if (!insRes.ok) {
-                  const error = await insRes.text();
-                  alert("Error al inscribirse: " + error);
+                  alert("❌ Error al inscribirse: " + (data.error || "Error desconocido"));
                   return;
                 }
 
+                alert("✅ " + data.message);
                 calendar.refetchEvents();
                 cargarInscripciones();
                 modalTaller.hide();

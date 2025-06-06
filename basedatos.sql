@@ -675,3 +675,131 @@ BEGIN
 END //
 
 DELIMITER ;
+
+---------------------------------------------------
+/*  procedimiento para registrar al alumno en un taller  */
+DELIMITER //
+
+CREATE PROCEDURE sp_inscribirse_taller (
+  IN p_idalumno INT,
+  IN p_idtaller INT
+)
+BEGIN
+  DECLARE v_cupo_maximo INT;
+  DECLARE v_inscritos INT;
+  DECLARE v_ya_inscrito INT;
+  DECLARE v_estado_taller VARCHAR(20);
+
+  -- 1. Verificar si el alumno ya está inscrito
+  SELECT COUNT(*) INTO v_ya_inscrito
+  FROM inscripciones
+  WHERE idalumno = p_idalumno AND idtaller = p_idtaller;
+
+  IF v_ya_inscrito > 0 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'El alumno ya está inscrito en este taller';
+  END IF;
+
+  -- 2. Obtener el estado del taller y su cupo máximo
+  SELECT estado, cupo_maximo INTO v_estado_taller, v_cupo_maximo
+  FROM talleres
+  WHERE idtaller = p_idtaller;
+
+  IF v_estado_taller IS NULL THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'El taller no existe';
+  END IF;
+
+  IF v_estado_taller != 'active' THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'El taller no está activo';
+  END IF;
+
+  -- 3. Contar los inscritos actuales
+  SELECT COUNT(*) INTO v_inscritos
+  FROM inscripciones
+  WHERE idtaller = p_idtaller;
+
+  IF v_inscritos >= v_cupo_maximo THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'El taller ya alcanzó el cupo máximo';
+  END IF;
+
+  -- 4. Insertar inscripción
+  INSERT INTO inscripciones (idalumno, idtaller)
+  VALUES (p_idalumno, p_idtaller);
+END //
+
+DELIMITER ;
+------------------------------------------------------------------------
+/* */
+CREATE OR REPLACE VIEW view_inscripciones_alumno AS
+SELECT 
+  i.idinscripcion,
+  i.idalumno,
+  i.idtaller,
+  i.estatus,
+  t.nombre AS nombre_taller,
+  t.fecha,
+  t.hora,
+  p.nombre AS periodo,
+  u.nombre AS tallerista_nombre,
+  u.paterno AS tallerista_paterno,
+  u.materno AS tallerista_materno
+FROM inscripciones i
+JOIN talleres t ON i.idtaller = t.idtaller
+JOIN periodos p ON t.idperiodo = p.idperiodo
+JOIN usuarios u ON t.idtallerista = u.iduser;
+
+
+-- ==========================================
+-- Procedimiento: sp_cancelar_inscripcion
+-- Descripción : Cambia el estatus de una inscripción a 'cancelado'
+-- Parámetros  :
+--   p_idinscripcion - ID de la inscripción a cancelar
+-- ==========================================
+DELIMITER //
+CREATE PROCEDURE sp_cancelar_inscripcion(IN p_idinscripcion INT)
+BEGIN
+  UPDATE inscripciones
+  SET estatus = 'cancelado'
+  WHERE idinscripcion = p_idinscripcion;
+END //
+DELIMITER ;
+
+-- ==========================================
+-- Procedimiento: sp_cambiar_estado_taller
+-- Descripción : Actualiza el estado de un taller (por ejemplo: 'activo', 'cancelado')
+-- Parámetros  :
+--   p_idtaller     - ID del taller
+--   nuevo_estado   - Nuevo estado que se le asignará al taller
+-- ==========================================
+DELIMITER //
+CREATE PROCEDURE sp_cambiar_estado_taller(IN p_idtaller INT, IN nuevo_estado VARCHAR(50))
+BEGIN
+  UPDATE talleres
+  SET estado = nuevo_estado
+  WHERE idtaller = p_idtaller;
+END //
+DELIMITER ;
+
+-- ==========================================
+-- Procedimiento: sp_editar_taller_tallerista
+-- Descripción : Permite a un tallerista editar nombre y descripción de su taller
+-- Parámetros  :
+--   p_idtaller    - ID del taller a editar
+--   p_nombre      - Nuevo nombre del taller
+--   p_descripcion - Nueva descripción del taller
+-- ==========================================
+DELIMITER //
+CREATE PROCEDURE sp_editar_taller_tallerista(
+  IN p_idtaller INT,
+  IN p_nombre VARCHAR(100),
+  IN p_descripcion TEXT
+)
+BEGIN
+  UPDATE talleres
+  SET nombre = p_nombre, descripcion = p_descripcion
+  WHERE idtaller = p_idtaller;
+END //
+DELIMITER ;
